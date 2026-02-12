@@ -3,6 +3,7 @@ import './PlayingBoard.css';
 
 function PlayingBoard() {
   const canvasRef = useRef(null);
+  // const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -10,14 +11,14 @@ function PlayingBoard() {
   
     ctx.strokeStyle = "black";
     ctx.lineWidth = 2;
-    ctx.strokeRect(100, 100, 300, 300);
+    ctx.strokeRect(0, 0, 1000, 600);
   }, []);
 
   return (
     <div className="playing-board-container">
       <canvas 
         ref={canvasRef} 
-        width={600} 
+        width={1000} 
         height={600}
         className="playing-board-canvas"
       />
