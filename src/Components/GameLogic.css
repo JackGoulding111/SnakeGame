@@ -1,13 +1,17 @@
 .playing-board-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 20px;
-  }
-  
-  .playing-board-canvas {
-    border: 2px solid #333;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
 
-  
+.playing-board-canvas {
+  border: 2px solid #333;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Gradient background! */
+  /* Try other gradients:
+     linear-gradient(to right, #ff6b6b, #4ecdc4)
+     linear-gradient(45deg, #85FFBD 0%, #FFFB7D 100%)
+     radial-gradient(circle, #667eea, #764ba2)
+  */
+}

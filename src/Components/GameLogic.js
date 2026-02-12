@@ -15,19 +15,37 @@ function GameLogic() {
   
   const [direction, setDirection] = useState({ x: 1, y: 0 });
   
-
   const [food, setFood] = useState({
     x: Math.floor(Math.random() * gridSize),
     y: Math.floor(Math.random() * gridSize)
   });
 
+  const [gameOver, setGameOver] = useState(false);
+
   useEffect(() => {
+    if (gameOver) return; // Stop the game loop if game is over
+    
     const gameLoop = setInterval(() => {
       setSnake((prevSnake) => {
         const newHead = {
           x: prevSnake[0].x + direction.x,
           y: prevSnake[0].y + direction.y
         };
+        
+        // Check for wall collision
+        if (newHead.x < 0 || newHead.x >= gridSize || newHead.y < 0 || newHead.y >= gridSize) {
+          setGameOver(true);
+          return prevSnake; // Don't update snake position
+        }
+        
+        // Check for self-collision (head hitting body)
+        const hitSelf = prevSnake.some(segment => 
+          segment.x === newHead.x && segment.y === newHead.y
+        );
+        if (hitSelf) {
+          setGameOver(true);
+          return prevSnake; // Don't update snake position
+        }
         
         if (newHead.x === food.x && newHead.y === food.y) {
           setFood({
@@ -43,31 +61,45 @@ function GameLogic() {
     }, 150);
     
     return () => clearInterval(gameLoop);
-  }, [direction, food]);
+  }, [direction, food, gameOver]);
 
   // keyboard controls
   useEffect(() => {
     const handleKeyPress = (e) => {
+      if (gameOver) return; // Don't accept controls if game is over
+      
       switch(e.key) {
         case 'ArrowUp':
         case 'w':
         case 'W':
-          setDirection({ x: 0, y: -1 });
+          // Can't move up if currently moving down
+          if (direction.y !== 1) {
+            setDirection({ x: 0, y: -1 });
+          }
           break;
         case 'ArrowDown':
         case 's':
         case 'S':
-          setDirection({ x: 0, y: 1 });
+          // Can't move down if currently moving up
+          if (direction.y !== -1) {
+            setDirection({ x: 0, y: 1 });
+          }
           break;
         case 'ArrowLeft':
         case 'a': 
         case 'A':
-          setDirection({ x: -1, y: 0 });
+          // Can't move left if currently moving right
+          if (direction.x !== 1) {
+            setDirection({ x: -1, y: 0 });
+          }
           break;
         case 'ArrowRight':
         case 'd':
         case 'D':
-          setDirection({ x: 1, y: 0 });
+          // Can't move right if currently moving left
+          if (direction.x !== -1) {
+            setDirection({ x: 1, y: 0 });
+          }
           break;
         default:
           break;
@@ -76,7 +108,7 @@ function GameLogic() {
     
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, []);
+  }, [gameOver, direction]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -102,8 +134,9 @@ function GameLogic() {
     }
     
     // Draw snake
-    ctx.fillStyle = "gold";
-    snake.forEach((segment) => {
+    snake.forEach((segment, index) => {
+      // Head is green, body is gold
+      ctx.fillStyle = index === 0 ? "green" : "gold";
       ctx.fillRect(
         segment.x * cellSize,
         segment.y * cellSize,
@@ -124,7 +157,43 @@ function GameLogic() {
     ctx.strokeStyle = "black";
     ctx.lineWidth = 2;
     ctx.strokeRect(0, 0, 600, 600);
-  }, [snake, food]);
+    
+    // Draw game over overlay
+    if (gameOver) {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+      ctx.fillRect(0, 0, 600, 600);
+      
+      ctx.fillStyle = "white";
+      ctx.font = "48px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("Game Over!", 300, 280);
+      
+      ctx.font = "24px Arial";
+      ctx.fillText("Press R to Restart", 300, 330);
+    }
+  }, [snake, food, gameOver]);
+
+  // Restart game functionality
+  useEffect(() => {
+    const handleRestart = (e) => {
+      if (e.key === 'r' || e.key === 'R') {
+        setGameOver(false);
+        setSnake([
+          { x: 3, y: 0 },
+          { x: 2, y: 0 },
+          { x: 1, y: 0 }
+        ]);
+        setDirection({ x: 1, y: 0 });
+        setFood({
+          x: Math.floor(Math.random() * gridSize),
+          y: Math.floor(Math.random() * gridSize)
+        });
+      }
+    };
+    
+    window.addEventListener('keydown', handleRestart);
+    return () => window.removeEventListener('keydown', handleRestart);
+  }, []);
 
   return (
     <div className="playing-board-container">
