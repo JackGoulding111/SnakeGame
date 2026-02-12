@@ -4,17 +4,22 @@ import './GameLogic.css';
 function GameLogic() {
   const canvasRef = useRef(null);
   
-  const gridSize = 40;
-  const cellSize = 15;
+  const gridSize = 15; // amount of cells per row/column
+  const cellSize = 600 / gridSize; // the amount of pixels per cell
   
   const [snake, setSnake] = useState([
-    { x: 20, y: 20 },
-    { x: 19, y: 20 },
-    { x: 18, y: 20 }
+    { x: 3, y: 0 },
+    { x: 2, y: 0 },
+    { x: 1, y: 0 }
   ]);
   
   const [direction, setDirection] = useState({ x: 1, y: 0 });
+  
 
+  const [food, setFood] = useState({
+    x: Math.floor(Math.random() * gridSize),
+    y: Math.floor(Math.random() * gridSize)
+  });
 
   useEffect(() => {
     const gameLoop = setInterval(() => {
@@ -24,14 +29,21 @@ function GameLogic() {
           y: prevSnake[0].y + direction.y
         };
         
-        // Add new head, remove tail
+        if (newHead.x === food.x && newHead.y === food.y) {
+          setFood({
+            x: Math.floor(Math.random() * gridSize),
+            y: Math.floor(Math.random() * gridSize)
+          });
+          
+          return [newHead, ...prevSnake];
+        }
+        
         return [newHead, ...prevSnake.slice(0, -1)];
       });
-      //snake moves speed, lower = faster
     }, 150);
     
-    return () => clearInterval(gameLoop); // Cleanup
-  }, [direction]);
+    return () => clearInterval(gameLoop);
+  }, [direction, food]);
 
   // keyboard controls
   useEffect(() => {
@@ -89,6 +101,7 @@ function GameLogic() {
       ctx.stroke();
     }
     
+    // Draw snake
     ctx.fillStyle = "gold";
     snake.forEach((segment) => {
       ctx.fillRect(
@@ -99,10 +112,19 @@ function GameLogic() {
       );
     });
     
+    // Draw food
+    ctx.fillStyle = "red";
+    ctx.fillRect(
+      food.x * cellSize,
+      food.y * cellSize,
+      cellSize,
+      cellSize
+    );
+    
     ctx.strokeStyle = "black";
     ctx.lineWidth = 2;
     ctx.strokeRect(0, 0, 600, 600);
-  }, [snake]);
+  }, [snake, food]);
 
   return (
     <div className="playing-board-container">
