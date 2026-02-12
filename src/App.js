@@ -1,11 +1,11 @@
-import PlayingBoard from './Components/PlayingBoard';
+import GameLogic from './Components/GameLogic';
 import './App.css';
 
 function App() {
   return (
     <div className="App">
       <h1>Snake Game</h1>
-      <PlayingBoard />
+      <GameLogic/>
       <h2>Score:</h2>
     </div>
   );
